@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template, url_for
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
@@ -24,7 +24,7 @@ class Utilisateur(db.Model):
 
 @app.route("/")
 def index():
-    return 'hello world'
+    return render_template('index.html')
 
 
 if __name__ == '__main__':
