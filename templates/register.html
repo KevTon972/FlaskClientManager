@@ -4,25 +4,9 @@
 {% endblock %}
 
 {% block body %}
-<nav class="bg-gray-800">
-  <div class="flex flex-1 px-6 justify-center items-center">
-    <div class="relative flex h-16 items-center w-80 justify-center">
-      <div class="absolute inset-y-0 left-0 flex items-center justify-center sm:hidden">
-      </div>
-      <div class="flex justify-center sm:items-stretch sm:justify-start">
-        <div class="flex justify-center sm:block w-80">
-          <div class="flex justify-center w-full text-center">
-            <a href="#" class="bg-gray-900 text-white rounded-md px-3 py-2 flex justify-center text-sm font-medium w-64 " aria-current="page">FlaskClientManager</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav>
-
 <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
   <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-    <form class="space-y-6" action="#" method="POST">
+    <form class="space-y-6" action="{{ url_for('index') }}" method="POST">
       <div>
         <label for="username" class="block text-sm font-medium leading-6 text-gray-900">Username</label>
         <div class="mt-2">
