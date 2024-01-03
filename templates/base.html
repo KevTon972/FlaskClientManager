@@ -10,16 +10,24 @@
 </head>
 <body>
     <nav class="bg-gray-800">
-        <div class="flex flex-1 px-6 justify-center items-center">
+        <div class="flex flex-1 px-6 justify-between items-center">
           <div class="relative flex h-16 items-center w-80 justify-center">
             <div class="absolute inset-y-0 left-0 flex items-center justify-center sm:hidden">
             </div>
-            <div class="flex justify-center sm:items-stretch sm:justify-start">
+            <div class="flex  sm:items-stretch sm:justify-start">
               <div class="flex justify-center sm:block w-80">
                 <div class="flex justify-center w-full text-center">
-                  <a href="#" class="bg-gray-900 text-white rounded-md px-3 py-2 flex justify-center text-sm font-medium w-64 " aria-current="page">FlaskClientManager</a>
+                  <a href="{{ url_for('index' )}}" class="bg-gray-900 text-white rounded-md px-3 py-2 flex justify-center text-sm font-medium w-64" aria-current="page">FlaskClientManager</a>
                 </div>
               </div>
+            </div>
+          </div>
+          <div class="flex justify-between w-72">
+            <div class="items-center">
+              <a href="{{ url_for('register') }}" class="bg-gray-900 text-white rounded-md px-3 py-2 flex text-sm justify-center font-medium w-32">Register</a>
+            </div>
+            <div class="">
+              <a href="{{ url_for('login') }}" class="bg-gray-900 text-white rounded-md px-3 py-2 flex text-sm justify-center font-medium w-32">Login</a>
             </div>
           </div>
         </div>
