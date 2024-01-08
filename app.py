@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, session, redirect, url_for, f
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, login_user, logout_user
+from flask_login import LoginManager, login_required, login_user, logout_user, UserMixin
 from secret_key import SECRET_KEY
 
 
@@ -19,7 +19,7 @@ with app.app_context():
     db.create_all()
 
 
-class Utilisateur(db.Model):
+class Utilisateur(db.Model, UserMixin):
     __tablename__= 'utilisateur'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), nullable=False,)
@@ -30,22 +30,16 @@ class Utilisateur(db.Model):
         self.username = username
         self.email = email
         self.password = password
-    
-    def is_active(self):
-        return True
-
-    def get_id(self):
-        return self.id
 
 
 @login_manager.user_loader
 def loader_user(user_id):
-    return Utilisateur.query.get(user_id)
+    return Utilisateur.query.get(int(user_id))
 
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
-    return render_template('base.html')
+    return render_template('index.html')
 
 
 @app.route("/register/", methods=['GET', 'POST'])
@@ -84,17 +78,25 @@ def login():
     # check if informations are correct and connect the user
     if request.method == 'POST':
         user = Utilisateur.query.filter_by(username=request.form.get('username')).first()
-        
-        if check_password_hash(user.password, request.form.get('password')) and user.username == request.form.get('username'):
-            login_user(user,remember=True)
-            flash('Successful Login', 'success')
-            return redirect(url_for('index'))
-        else:
+        try:
+            if check_password_hash(user.password, request.form.get('password')) and user.username == request.form.get('username'):
+                login_user(user,remember=True)
+                flash('Successful Login', 'success')
+                return redirect(url_for('index'))
+        except:
             flash("Your username or your password aren't correct", 'error')
             return render_template('login.html')
         
     return render_template('login.html')
 
+
+
+
+@app.route("/logout/")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)
