@@ -15,17 +15,20 @@
             <th colspan="1" class="texte-black font-semibold">Nom</th>
             <th colspan="1" class="texte-black font-semibold">Email</th>
             <th colspan="1" class="texte-black font-semibold">Telephone</th>
-            <th colspan="1" class="texte-black font-semibold">Adresse</th>
-          </tr>
-          
+            <th colspan="1" class="texte-black font-semibold">Adresse</th>           
+          </tr>        
         </thead>
         <tbody>
             {% for client in clients %}
             <tr>
-                <td class="border-2 border-gray-600 px-3 py-1.5 rounded-md">{{ client.name }}</td>
-                <td class="border-2 border-gray-600 px-3 py-1.5 rounded-md">{{ client.email }}</td>
-                <td class="border-2 border-gray-600 px-3 py-1.5 rounded-md">{{ client.telephone }}</td>
-                <td class="border-2 border-gray-600 px-3 py-1.5 rounded-md">{{ client.adresse }}</td>
+                <td class="border-2 border-gray-600 px-3 py-1.5">{{ client.name }}</td>
+                <td class="border-2 border-gray-600 px-3 py-1.5">{{ client.email }}</td>
+                <td class="border-2 border-gray-600 px-3 py-1.5">{{ client.telephone }}</td>
+                <td class="border-2 border-gray-600 px-3 py-1.5">{{ client.adresse }}</td>
+                <td class="border-2 border-gray-600 px-3 py-1.5">
+                    <a href="{{ url_for('update', client_id=client.id) }}" class="text-blue-800">Modifier informations.</a>
+                </td>
+
             </tr>
             {% endfor %}
         </tbody>

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+  <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+    <h1 class="font-bold mb-4 bg-gray-800 text-white text-center rounded-md px-3 py-1.5">Modifier informations client</h1>
+    <form class="space-y-6" action="{{ url_for('update', client_id=client.id) }}" method="POST">
+        <div>
+          <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Client name</label>
+          <div class="mt-2">
+            <input id="name" name="name" type="name" autocomplete="name" required value="{{ client.name }}" class="block w-full rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-100 sm:text-sm sm:leading-6">
+          </div>
+        </div>
+        <div>
+          <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address</label>
+          <div class="mt-2">
+            <input id="email" name="email" type="email" required value="{{ client.email }}"class="block w-full rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-100 sm:text-sm sm:leading-6">
+          </div>
+        </div>
+        <div>
+          <div class="mt-2>
+            <label for="telephone" class="block text-sm font-medium leading-6 text-gray-900">Telephone number</label>
+            <input id="telephone" name="telephone" type="telephone" required value="{{ client.telephone }}" class="block w-full rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-gray-100 sm:text-sm sm:leading-6">
+          </div>
+        <div class="mt-2">
+          <label for="street_number" class="block text-sm font-medium leading-6 text-gray-900">Numero de rue</label>
+          <input id="street_number" name="street_number" type="street_number" autocomplete="street_number" required value="{{ adresse.street_number}}"  class="block w-full rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-gray-100 sm:text-sm sm:leading-6">
+        </div>
+        <div class="mt-2">
+          <label for="street_name" class="block text-sm font-medium leading-6 text-gray-900">Nom de rue</label>
+          <input id="street_name" name="street_name" type="street_name" autocomplete="street_name" required value="{{ adresse.street_name}}" class="block w-full rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-gray-100 sm:text-sm sm:leading-6">
+        </div>
+        <div class="mt-2">
+          <label for="zipcode" class="block text-sm font-medium leading-6 text-gray-900">Code postale</label>
+          <input id="zipcode" name="zipcode" type="zipcode" autocomplete="zipcode" required value="{{ adresse.zipcode}}" class="block w-full rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-gray-100 sm:text-sm sm:leading-6">
+        </div>
+        <div class="mt-2">
+          <label for="city_name" class="block text-sm font-medium leading-6 text-gray-900">Ville</label>
+          <input id="city_name" name="city_name" type="city_name" autocomplete="city_name" required value="{{ adresse.city_name}}" class="block w-full rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-gray-100 sm:text-sm sm:leading-6">
+        </div>
+          <button type="submit" class="flex w-full justify-center mt-8 rounded-md bg-gray-700 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-800">Update</button>
+        </div>
+      </form>
+  </div>
+</div>
+{% endblock %}

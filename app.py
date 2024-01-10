@@ -78,16 +78,15 @@ def loader_user(user_id):
 def index():
     try:
         # check if user is authenticated and recover his clients
-        if current_user:
+        if current_user.is_authenticated:
             user = current_user
             clients = Client.query.filter_by(utilisateur_id=user.id).all()
 
             return render_template('index.html', clients=clients)
         
     except Exception as e:
-        print('Error: ',e)
+        print('Error: ', str(e))
         return render_template('index.html')
-
 
 
 @app.route("/register/", methods=['GET', 'POST'])
@@ -141,22 +140,23 @@ def login():
             try:
                 if check_password_hash(user.password, request.form.get('password')) and user.username == request.form.get('username') or user.email == request.form.get('username'):
                     login_user(user,remember=True)
-                    flash('Connexion réussie.', 'success')                    
+                    flash('Connexion réussie.', 'success')
+
                     return redirect(url_for('index'))    
                 
             except Exception as e:
                 flash("Votre nom ou mot de passe n'est pas correct.", 'error')
                 print(str(e))
+
                 return render_template('login.html')
-            
         else:
             flash("L'utilisateur n'est pas enregistré dans la base de données.", 'error')
             return render_template('login.html')
     try:
-        if current_user:
-            user = current_user
-            clients = Client.query.filter_by(utilisateur_id=user.id).all()
-            return render_template('index.html', clients=clients)
+        user = current_user
+        clients = Client.query.filter_by(utilisateur_id=user.id).all()
+
+        return render_template('index.html', clients=clients)
         
     except Exception as e:
         print("Error login:", e)
@@ -208,6 +208,35 @@ def add_a_client():
             return render_template('add_client.html')
 
     return render_template('add_a_client.html')
+
+
+@app.route("/update/<int:client_id>", methods=['GET', 'POST'])
+@login_required
+def update(client_id):
+    try:
+        client = db.session.query(Client).get(client_id)
+        adresse = db.session.query(Adresse).filter_by(client_id=client_id).first()
+
+        if request.method == "POST":
+            if client and adresse:
+                client.name = request.form.get('name')
+                client.email = request.form.get('email')
+                client.telephone = request.form.get('telephone')
+                adresse.street_number = request.form.get('street_number')
+                adresse.street_name = request.form.get('street_name')
+                adresse.zipcode = request.form.get('zipcode')
+                adresse.city_name = request.form.get('city_name')
+
+                db.session.commit()
+                flash("Les informations du client ont été mises à jour avec succès.", 'success')
+                return redirect(url_for('index'))
+            else:
+                flash("Impossible de trouver le client ou l'adresse associée.", 'error')
+    except Exception as e:
+        print(e)
+        flash("Aucun résultat trouvé pour le client ou l'adresse associée.", 'error')
+
+    return render_template('update.html', client=client, adresse=adresse)
 
 
 if __name__ == '__main__':
