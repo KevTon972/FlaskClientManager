@@ -8,6 +8,28 @@
         <a href="{{ url_for('add_a_client') }}" class="bg-gray-900 text-white rounded-md px-3 py-2 flex text-sm justify-center font-medium w-32">Add a client.</a>
     </p>
 </div>
-
+<div class="flex justify-center mt-10">
+    <table class="table-auto">
+        <thead>
+          <tr>
+            <th colspan="1" class="texte-black font-semibold">Nom</th>
+            <th colspan="1" class="texte-black font-semibold">Email</th>
+            <th colspan="1" class="texte-black font-semibold">Telephone</th>
+            <th colspan="1" class="texte-black font-semibold">Adresse</th>
+          </tr>
+          
+        </thead>
+        <tbody>
+            {% for client in clients %}
+            <tr>
+                <td class="border-2 border-gray-600 px-3 py-1.5 rounded-md">{{ client.name }}</td>
+                <td class="border-2 border-gray-600 px-3 py-1.5 rounded-md">{{ client.email }}</td>
+                <td class="border-2 border-gray-600 px-3 py-1.5 rounded-md">{{ client.telephone }}</td>
+                <td class="border-2 border-gray-600 px-3 py-1.5 rounded-md">{{ client.adresse }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+</div>
 {% endif %}
 {% endblock %}

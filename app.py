@@ -9,7 +9,6 @@ from secret_key import SECRET_KEY
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:admin@localhost/flaskdb'
 app.config['SECRET_KEY'] = SECRET_KEY
-app.config['STATIC_FOLDER'] = 'static'
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -43,7 +42,8 @@ class Client(db.Model):
     telephone = db.Column(db.String(15))
     adresse = db.relationship('Adresse', backref='client', uselist=False)
 
-    def __init__(self, name, email, telephone, adresse):
+    def __init__(self, utilisateur_id, name, email, telephone, adresse):
+        self.utilisateur_id = utilisateur_id
         self.name = name
         self.email = email
         self.telephone = telephone
@@ -74,9 +74,20 @@ def loader_user(user_id):
     return db.session.get(Utilisateur, int(user_id))
 
 
-@app.route("/", methods=['GET', 'POST'])
+@app.route("/index/", methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    try:
+        # check if user is authenticated and recover his clients
+        if current_user:
+            user = current_user
+            clients = Client.query.filter_by(utilisateur_id=user.id).all()
+
+            return render_template('index.html', clients=clients)
+        
+    except Exception as e:
+        print('Error: ',e)
+        return render_template('index.html')
+
 
 
 @app.route("/register/", methods=['GET', 'POST'])
@@ -88,7 +99,7 @@ def register():
         password = request.form.get('password') 
         confirm_password = request.form.get('confirm_password')
 
-        # Ajoutez des vérifications pour vous assurer que les valeurs ne sont pas None
+        # Chek if values aren't none
         if not username or not email or not password or not confirm_password:
             flash("Veuillez remplir tous les champs du formulaire.", 'error')
             return render_template('register.html')
@@ -98,7 +109,7 @@ def register():
             flash('Les mots de passe ne correspondent pas.', 'error')
             return render_template('register.html')
 
-        # Ajoutez une vérification pour vous assurer que password n'est pas None
+        # Check if password aren't none
         if password is None:
             flash("Le mot de passe ne peut pas être vide.", 'error')
             return render_template('register.html')
@@ -120,30 +131,43 @@ def register():
     return render_template('register.html')
 
 
-@app.route("/login/", methods=['GET', 'POST'])
+@app.route("/", methods=['GET', 'POST'])
 def login():
     # check if informations are correct and connect the user
     if request.method == 'POST':
         user = Utilisateur.query.filter_by(username=request.form.get('username')).first()
-        try:
-            if check_password_hash(user.password, request.form.get('password')) and user.username == request.form.get('username'):
-                login_user(user,remember=True)
-                flash('Connexion réussie.', 'success')
-                return redirect(url_for('index'))
-        except Exception as e:
-            flash("Votre nom ou mot de passe n'est pas correct.", 'error')
-            print(str(e))
-            return render_template('login.html')
-        
-    return render_template('login.html')
 
+        if user:
+            try:
+                if check_password_hash(user.password, request.form.get('password')) and user.username == request.form.get('username') or user.email == request.form.get('username'):
+                    login_user(user,remember=True)
+                    flash('Connexion réussie.', 'success')                    
+                    return redirect(url_for('index'))    
+                
+            except Exception as e:
+                flash("Votre nom ou mot de passe n'est pas correct.", 'error')
+                print(str(e))
+                return render_template('login.html')
+            
+        else:
+            flash("L'utilisateur n'est pas enregistré dans la base de données.", 'error')
+            return render_template('login.html')
+    try:
+        if current_user:
+            user = current_user
+            clients = Client.query.filter_by(utilisateur_id=user.id).all()
+            return render_template('index.html', clients=clients)
+        
+    except Exception as e:
+        print("Error login:", e)
+        return render_template('login.html')
 
 
 @app.route("/logout/")
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 
 @app.route("/add_a_client", methods=['GET', 'POST'])

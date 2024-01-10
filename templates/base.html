@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="{{ url_for('static', filename='js/main.js')}}"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <title>FlaskClientManager</title>
     {% block head %}{% endblock %}
@@ -18,7 +17,11 @@
             <div class="flex  sm:items-stretch sm:justify-start">
               <div class="flex justify-center sm:block w-80">
                 <div class="flex justify-center w-full text-center">
-                  <a href="{{ url_for('index' )}}" class="bg-gray-900 text-white rounded-md px-3 py-2 flex justify-center text-sm font-medium w-64" aria-current="page">FlaskClientManager</a>
+                  {% if current_user.is_authenticated %}
+                  <a href="{{ url_for('index') }}" class="bg-gray-900 text-white rounded-md px-3 py-2 flex justify-center text-sm font-medium w-64" aria-current="page">FlaskClientManager</a>
+                  {% else %}
+                  <a href="{{ url_for('login') }}" class="bg-gray-900 text-white rounded-md px-3 py-2 flex justify-center text-sm font-medium w-64" aria-current="page">FlaskClientManager</a>
+                  {% endif %}
                 </div>
               </div>
             </div>
