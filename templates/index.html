@@ -8,6 +8,8 @@
         <a href="{{ url_for('add_a_client') }}" class="bg-gray-900 text-white rounded-md px-3 py-2 flex text-sm justify-center font-medium w-32">Add a client.</a>
     </p>
 </div>
+
+{% if clients%}
 <div class="flex justify-center mt-10">
     <table class="table-auto">
         <thead>
@@ -26,13 +28,16 @@
                 <td class="border-2 border-gray-600 px-3 py-1.5">{{ client.telephone }}</td>
                 <td class="border-2 border-gray-600 px-3 py-1.5">{{ client.adresse }}</td>
                 <td class="border-2 border-gray-600 px-3 py-1.5">
-                    <a href="{{ url_for('update', client_id=client.id) }}" class="text-blue-800">Modifier informations.</a>
+                    <a href="{{ url_for('client_profil', client_id=client.id) }}" class="text-blue-800">Voir informations client.</a>                    
                 </td>
 
             </tr>
             {% endfor %}
         </tbody>
       </table>
+      {% endif %}
 </div>
+
+
 {% endif %}
 {% endblock %}

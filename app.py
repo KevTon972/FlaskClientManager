@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for, flash
+from flask import Flask, render_template, request, session, redirect, url_for, flash, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -40,7 +40,7 @@ class Client(db.Model):
     name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(50))
     telephone = db.Column(db.String(15))
-    adresse = db.relationship('Adresse', backref='client', uselist=False)
+    adresse = db.relationship('Adresse', backref='client', uselist=False, cascade='save-update, merge, delete')
 
     def __init__(self, utilisateur_id, name, email, telephone, adresse):
         self.utilisateur_id = utilisateur_id
@@ -209,13 +209,18 @@ def add_a_client():
 
     return render_template('add_a_client.html')
 
+@app.route("/client_profil/<int:client_id>", methods=['GET', 'POST'])
+def client_profil(client_id):
+    client = Client.query.filter_by(id=client_id).first()
+    adresse = Adresse.query.filter_by(client_id=client_id).first()
+    return render_template('client_profil.html', client=client, adresse=adresse)
 
 @app.route("/update/<int:client_id>", methods=['GET', 'POST'])
 @login_required
 def update(client_id):
     try:
-        client = db.session.query(Client).get(client_id)
-        adresse = db.session.query(Adresse).filter_by(client_id=client_id).first()
+        client = Client.query.filter_by(id=client_id).first()
+        adresse = Adresse.query.filter_by(client_id=client_id).first()
 
         if request.method == "POST":
             if client and adresse:
@@ -236,8 +241,29 @@ def update(client_id):
         print(e)
         flash("Aucun résultat trouvé pour le client ou l'adresse associée.", 'error')
 
-    return render_template('update.html', client=client, adresse=adresse)
+    return render_template('client_profil.html', client=client, adresse=adresse)
 
+
+@app.route("/delete_client/<int:client_id>", methods=['GET', 'POST'])
+@login_required
+def delete_client(client_id):
+    user = current_user
+    clients = Client.query.filter_by(utilisateur_id=user.id).all()    
+    client = Client.query.filter_by(id=client_id).first()
+    adresse = Adresse.query.filter_by(client_id=client_id).first()
+
+    if request.method == 'GET':
+        try:
+            db.session.delete(client)
+            db.session.commit()
+
+            return redirect(url_for('index', clients=clients))
+
+        except Exception as e:
+            print(e)
+            return render_template('client_profil.html', client=client, adresse=adresse)
+    
+    return render_template('client_profil.html', client=client, adresse=adresse)
 
 if __name__ == '__main__':
     app.run(debug=True)
