@@ -1,8 +1,12 @@
-from flask import Flask, render_template, request, session, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, render_template_string, request, redirect, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user, UserMixin
+
+import requests
+import folium
+
 from secret_key import SECRET_KEY
 
 
@@ -26,11 +30,13 @@ class Utilisateur(db.Model, UserMixin):
     email = db.Column(db.String(50), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=False)
     clients = db.relationship('Client', backref='utilisateur')
+    adresse = db.relationship('Adresse', backref='client', uselist=False, cascade='save-update, merge, delete')
 
-    def __init__(self, username, email, password):
+    def __init__(self, username, email, password, adresse):
         self.username = username
         self.email = email
         self.password = password
+        self.adresse = adresse
 
 
 class Client(db.Model):
@@ -264,6 +270,56 @@ def delete_client(client_id):
             return render_template('client_profil.html', client=client, adresse=adresse)
     
     return render_template('client_profil.html', client=client, adresse=adresse)
+
+
+@app.route("/map_street/<int:client_id>")
+def map_street(client_id):
+    user = current_user
+    adresse = Adresse.query.filter_by(client_id=client_id).first()
+    URL_BASE ='https://nominatim.openstreetmap.org/search?'
+    numero_de_rue = adresse.street_number
+    street = adresse.street_name
+    city = adresse.city_name
+    response = requests.get(f'{URL_BASE}q={numero_de_rue}+{street}+{city}&format=json')
+
+    data = response.json()
+    longitude = data[0].get('lon')
+    latitude = data[0].get('lat')
+
+    location = float(latitude), float(longitude)
+
+    m = folium.Map(location=location,control_scale=True, zoom_start=13, height=400)
+    folium.Marker([latitude, longitude], popup='Client Location').add_to(m)
+    m.get_root().render()
+    header = m.get_root().header.render()
+    body_html = m.get_root().html.render()
+    script = m.get_root().script.render()
+
+    return render_template_string(
+        """
+            {% extends 'base.html' %}
+                {% block head %}
+                    {{ header|safe }}
+                {%endblock %}
+                {% block body%}
+                <div class="flex flex-col justify-center items-center px-6 py-12 lg:px-8">
+                    <div class="flex flex-col justify-center items-center w-2/4 px-6 py-12 lg:px-8">
+                        <h1 class="">Street Map</h1>
+                        {{ body_html|safe }}
+                    </div>
+                </div>
+                    <script>
+                        {{ script|safe }}
+                    </script>
+                {% endblock %}
+            
+        """,
+        header=header,
+        body_html=body_html,
+        script=script,
+    )
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

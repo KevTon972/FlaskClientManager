@@ -43,8 +43,9 @@
           <p class="flex w-32 justify-center rounded-md bg-gray-700 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-800">
             <a href="{{ url_for('delete_client', client_id=client.id) }}" class="hover">Supprimer</a>
           </p>
-        </div>
-        </div>
+          <p class="flex w-32 justify-center rounded-md bg-gray-700 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-gray-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-800">
+            <a href="{{ url_for('map_street', client_id=client.id) }}" class="hover">Afficher carte</a>
+          </p>
       </form>
   </div>
 </div>
