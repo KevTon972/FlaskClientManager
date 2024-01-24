@@ -26,11 +26,11 @@ with app.app_context():
 class Utilisateur(db.Model, UserMixin):
     __tablename__= 'utilisateur'
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(50), nullable=False,)
+    username = db.Column(db.String(50), nullable=False, unique=True)
     email = db.Column(db.String(50), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=False)
     clients = db.relationship('Client', backref='utilisateur')
-    adresse = db.relationship('Adresse', backref='client', uselist=False, cascade='save-update, merge, delete')
+    adresse = db.relationship('Adresse', backref='utilisateur', uselist=False, cascade='save-update, merge, delete')
 
     def __init__(self, username, email, password, adresse):
         self.username = username
@@ -59,11 +59,12 @@ class Client(db.Model):
 class Adresse(db.Model):
     __tablename__ = 'adresse'
     id = db.Column(db.Integer, primary_key=True)
+    utilisateur_id = db.Column(db.Integer, db.ForeignKey('utilisateur.id'))
     client_id = db.Column(db.Integer, db.ForeignKey('client.id'))
-    street_number = db.Column(db.Integer, nullable=False)
+    street_number = db.Column(db.String, nullable=True)
     street_name = db.Column(db.String(100), nullable=False)
-    zipcode = db.Column(db.String(20), nullable=False)
-    city_name = db.Column(db.String(20), nullable=False)
+    zipcode = db.Column(db.String(50), nullable=False)
+    city_name = db.Column(db.String(50), nullable=False)
     
     def __init__(self, street_number, street_name, zipcode, city_name):
         self.street_number = street_number
@@ -103,6 +104,10 @@ def register():
         email = request.form.get('email')
         password = request.form.get('password') 
         confirm_password = request.form.get('confirm_password')
+        street_number = request.form.get('street_number')
+        street_name = request.form.get('street_name')
+        zipcode = request.form.get('zipcode')
+        city_name = request.form.get('city_name')
 
         # Chek if values aren't none
         if not username or not email or not password or not confirm_password:
@@ -119,8 +124,9 @@ def register():
             flash("Le mot de passe ne peut pas être vide.", 'error')
             return render_template('register.html')
 
+        adresse = Adresse(street_number, street_name, zipcode, city_name)
         hashed_password = generate_password_hash(password, method='pbkdf2:sha1', salt_length=15)
-        new_user = Utilisateur(username=username, email=email, password=hashed_password)
+        new_user = Utilisateur(username, email, hashed_password, adresse)
 
         try:
             db.session.add(new_user)
@@ -189,11 +195,6 @@ def add_a_client():
         zipcode = request.form.get('zipcode')
         city_name = request.form.get('city_name')
 
-        # verifier que les valeurs ne sont pas None
-        if not client_name or not client_email or not client_telephone or not street_number or not street_name or not zipcode or not city_name:
-            flash("Veuillez remplir tous les champs du formulaire.", 'error')
-            return render_template('add_client.html')
-
         adresse = Adresse(street_number, street_name, zipcode, city_name)
         new_client = Client(current_user.id, client_name, client_email, client_telephone, adresse)
   
@@ -206,12 +207,12 @@ def add_a_client():
                 flash("L'enregistrement de votre nouveau client est un succès", 'success')
                 return redirect(url_for('index'))
             except Exception as e:
-                flash(f"Problème avec l'enregistrement du client : {str(e)}", 'error')
+                flash(f"Problème avec l'enregistrement du client", 'error')
                 print(str(e))
-                return render_template('add_client.html')
+                return render_template('add_a_client.html')
         else:
             flash("Problème avec la création de l'adresse ou du client.", 'error')
-            return render_template('add_client.html')
+            return render_template('add_a_client.html')
 
     return render_template('add_a_client.html')
 
@@ -274,18 +275,17 @@ def delete_client(client_id):
 
 @app.route("/map_street/<int:client_id>")
 def map_street(client_id):
-    user = current_user
     adresse = Adresse.query.filter_by(client_id=client_id).first()
     URL_BASE ='https://nominatim.openstreetmap.org/search?'
     numero_de_rue = adresse.street_number
     street = adresse.street_name
     city = adresse.city_name
+
     response = requests.get(f'{URL_BASE}q={numero_de_rue}+{street}+{city}&format=json')
 
     data = response.json()
     longitude = data[0].get('lon')
     latitude = data[0].get('lat')
-
     location = float(latitude), float(longitude)
 
     m = folium.Map(location=location,control_scale=True, zoom_start=13, height=400)
